@@ -62,8 +62,8 @@
   display: block;
   white-space: nowrap;
   flex-grow: 1;
-  overflow-x: scroll;
-  overflow-y: hidden;
+  overflow-x: auto;
+  overflow-y: auto;
 }
 
 
@@ -101,11 +101,30 @@
   border-radius: 10px;
   margin-left: 10px;
   margin-right: 10px;
+  margin-bottom: 10px;
+}
+.App-post-button {
+  vertical-align: top;
+  background-color: antiquewhite;
+  border-radius: 10px;
+  margin-left: 10px;
+  margin-right: 10px;
+  margin-bottom: 10px;
+  cursor: default;
+  user-select: none;
+}
+.App-post-button:hover {
+  filter: brightness(85%);
+}
+
+.App-post-button:active {
+  filter: brightness(50%);
 }
 
 .App-category-button {
-
 }
+
+
 .App-category-button:hover {
   background-color: #B3AFB3;
 }
