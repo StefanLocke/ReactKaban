@@ -22,7 +22,6 @@ class Application extends React.Component {
 
     setBoard(thing) {
         this.setState({currentBoard:thing})
-
     }
 
 
@@ -84,7 +83,7 @@ class Application extends React.Component {
                     </header>
                     <div className="App-body">
 
-                        <Board board={this.state.currentBoard}/>
+                        <Board boardid={this.state.currentBoard.id}/>
                     </div>
                 </div>
             );
@@ -118,56 +117,70 @@ class Application extends React.Component {
     }
 }
 
-function getBoard(id) {
+
+function getBoard(id,comp) {
     var board = null;
-
     var myHeaders = new Headers();
-
     myHeaders.append("Accept", "application/json");
-
     var myInit = { method: 'GET',
         headers: myHeaders,
         mode: 'cors',
         cache: 'default' };
 
-    var myRequest = new Request('kaban/boards/' + id,myInit);
+    var myRequest = new Request('kaban/boards/'+id,myInit);
 
     fetch(myRequest,myInit)
         .then(res => res.json())
-        .then((data) => board = data)
+        .then((data) => {
+            comp.setState({board:data})
+        })
         .catch(console.log)
-    return board;
 }
 
-function getBoardForCategory(id,category) {
-    var board = null;
-
+function getCategory(id,comp) {
     var myHeaders = new Headers();
-
     myHeaders.append("Accept", "application/json");
-
     var myInit = { method: 'GET',
         headers: myHeaders,
         mode: 'cors',
         cache: 'default' };
 
-    var myRequest = new Request('kaban/boards/1',myInit);
+    var myRequest = new Request('kaban/category/'+id,myInit);
 
     fetch(myRequest,myInit)
         .then(res => res.json())
-        .then((data) => board = data)
+        .then((data) => {
+            comp.setState({category:data})
+        })
         .catch(console.log)
-    category.setState({board:board});
+
 }
+
+function getPost(id,comp) {
+    var myHeaders = new Headers();
+    myHeaders.append("Accept", "application/json");
+    var myInit = { method: 'GET',
+        headers: myHeaders,
+        mode: 'cors',
+        cache: 'default' };
+
+    var myRequest = new Request('kaban/posts/'+id,myInit);
+
+    fetch(myRequest,myInit)
+        .then(res => res.json())
+        .then((data) => {
+            comp.setState({post:data})
+        })
+        .catch(console.log)
+}
+
+
 
 class BoardSelector extends React.Component {
     state = {
         number:0
     };
 
-    onClick() {
-        console.log("preesed")
-    }
 
     render() {
         if (this.state.number != 0) {
@@ -196,48 +209,40 @@ class BoardSelector extends React.Component {
     }
 }
 
-class Post extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state.post = this.props.post
-    }
-
-    state = {
-        post:null
-    }
-    render() {
-        return (
-        <div className={"App-post"}>
-            <h4 className={"App-post-header"}>{this.state.post.title}</h4>
-            <p>Content</p>
-        </div>
-        );
-    }
-}
-
 
 
 class Board extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state.board = props.board
+        this.state.boardid = props.boardid
+    }
+
+    componentDidMount() {
+        getBoard(this.state.boardid,this)
     }
 
     state = {
-        board: "Hello world"
+        board:null,
+        boardid:null
     }
+
     render() {
+        if (this.state.board === null) {
+            return (
+                <div className={"App-board"}>
+                    <h2 className={"App-board-header"}>Loading...</h2>
+                </div>
+            );
+        }
         return (
             <div className={"App-board"}>
                 <h2 className={"App-board-header"}>{this.state.board.title}</h2>
                 <div className={"Board-canvas"} >
                     <div className={"App-category-container"}>
-                        {
-                            this.state.board.categories.map(category =>
-                                <Category category={category} board={this.state.board} />
-                            )
-                        }
+                        {this.state.board.categories.map(category =>
+                            <Category categoryid={category}/>
+                        )}
                         <AddCategoryButton/>
                     </div>
 
@@ -252,9 +257,8 @@ class Board extends React.Component {
 class Category extends React.Component {
     constructor(props) {
         super(props);
-        this.state.category = props.category;
-        this.state.board = props.board;
-        this.state.board = props.board;
+        this.state.categoryid = props.categoryid;
+
         this.addNewPost = this.addNewPost.bind(this)
 
 
@@ -262,11 +266,10 @@ class Category extends React.Component {
 
     state = {
         category:null,
-        board:null,
+        categoryid:null
     }
 
-    addNewPost(board, category) {
-        console.log("Adding post to board " + board + " and category " + category);
+    addNewPost(categoryid) {
 
         var myHeaders = new Headers();
 
@@ -286,26 +289,26 @@ class Category extends React.Component {
                 "}"
         };
 
-        var myRequest = new Request('kaban/posts/1',myInit);
+        var myRequest = new Request('kaban/posts/'+categoryid,myInit);
 
         fetch(myRequest,myInit)
+            .then(getCategory(categoryid,this))
             .catch(console.log)
         console.log("Added");
-       getBoardForCategory(board.id,this)
 
 
     }
 
+    componentDidMount() {
+        getCategory(this.state.categoryid,this)
+    }
+
     render() {
         console.log(this.state.category);
-        if (this.state.board === null) {
+        if (this.state.category === null) {
             return (
                 <div className={"App-category"}>
-                    <h3 className={"App-category-header"}>{this.state.category.name}</h3>
-                    <div className={"App-post-container"}>
-                        Loading
-                        <div className={"App-post-button"} onClick={() => this.addNewPost(this.state.board.id,this.state.category.id)}>Add new Post</div>
-                    </div>
+                    <h3 className={"App-category-header"}>Loading...</h3>
                 </div>
             );
         }
@@ -314,11 +317,44 @@ class Category extends React.Component {
                 <h3 className={"App-category-header"}>{this.state.category.name}</h3>
                 <div className={"App-post-container"}>
                     {
-                        this.state.board.posts.map(p =>
-                       <Post post={p}/>
-                    )}
-                    <div className={"App-post-button"} onClick={() => this.addNewPost(this.state.board.id,this.state.category.id)}>Add new Post</div>
+                       this.state.category.posts.map(post =>
+                            <Post postid={post} />
+                        )
+                    }
+                    <div className={"App-post-button"} onClick={() => this.addNewPost(this.state.categoryid)}>
+                        Add new Post
+                    </div>
                 </div>
+            </div>
+        );
+    }
+}
+
+class Post extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state.postid = this.props.postid
+    }
+    componentDidMount() {
+        getPost(this.state.postid,this)
+    }
+
+    state = {
+        post:null,
+        postid:null
+    }
+    render() {
+        if (this.state.post === null ){
+            return (
+                <div className={"App-post"}>
+                    <h4 className={"App-post-header"}>Loading...</h4>
+                </div>
+            );
+        }
+        return (
+            <div className={"App-post"}>
+                <h4 className={"App-post-header"}>{this.state.post.title}</h4>
+                <p>{this.state.post.content}</p>
             </div>
         );
     }
