@@ -2,212 +2,100 @@ import logo from './logo.svg';
 import './App.css';
 import React from "react";
 import ReactDOM from "react-dom";
+import {addNewCategory, addNewPost, getBoard, getBoards, getCategory, getPost} from "./Utils";
+
 
 function App() {
   return (
-        <Application></Application>
+      <div className={"App"}>
+          <header className={"App-header"}>
+              <img src={logo} className="App-logo" alt="logo" />
+              <p>
+                  Kaban implementation using React and JAX-RS
+              </p>
+              <a
+                  className="App-link"
+                  href="https://reactjs.org"
+                  target="_blank"
+                  rel="noopener noreferrer"
+              >
+                  GitHub sources.
+              </a>
+          </header>
+          <div className={"App-body"}>
+              <Home />
+          </div>
+      </div>
   );
 }
 
-class Application extends React.Component {
 
+/*** Board selection home ***/
+class Home extends React.Component {
     constructor(props) {
         super(props);
-        this.setBoard = this.setBoard.bind(this)
-    }
-    state = {
-        boards: [],
-        currentBoard:null
     }
 
-    setBoard(thing) {
-        this.setState({currentBoard:thing})
+    state =  {
+        boards:null,
+
+        boardId:null,
+        board:null,
+
+        loaded:false,
+        chosen:false
     }
 
+    componentDidMount() {
+        getBoards(this);
+    }
 
-    /*choose(){
-
+    renderChosen() {
         return (
             <div>
-                <h4>menu</h4>
-                <button onClick={this.openBoards}>OpenBoards</button>
-            </div>
-        );
-    }*/
-
-    componentDidMount(){
-        var myHeaders = new Headers();
-
-        myHeaders.append("Accept", "application/json");
-
-        var myInit = { method: 'GET',
-            headers: myHeaders,
-            mode: 'cors',
-            cache: 'default' };
-
-        var myRequest = new Request('kaban/boards',myInit);
-
-        fetch(myRequest,myInit)
-            .then(res => res.json())
-            .then((data) => {
-                this.setState({boards:data})
-            })
-            .catch(console.log)
-    }
-
-
-
-
-    render() {
-        console.log(this.state.boards)
-        if (this.state.boards === "undefined") {
-            return (<div>Loading {this.state.boards}</div>);
-        }
-
-        if (this.state.currentBoard != null)
-            return (
-                <div className="App">
-                    <header className="App-header">
-                        <img src={logo} className="App-logo" alt="logo" />
-                        <p>
-                            Kaban implementation using React and JAX-RS
-                        </p>
-                        <a
-                            className="App-link"
-                            href="https://reactjs.org"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            GitHub sources.
-                        </a>
-                    </header>
-                    <div className="App-body">
-
-                        <Board boardid={this.state.currentBoard.id}/>
-                    </div>
-                </div>
-            );
-        return (
-            //<Test board={this.state.board}/>
-
-            /*<div>
-                {this.state.board}
-            </div>*/
-            <div className="App">
-                <header className="App-header">
-                    <img src={logo} className="App-logo" alt="logo" />
-                    <p>
-                        Kaban implementation using React and JAX-RS
-                    </p>
-                    <a
-                        className="App-link"
-                        href="https://reactjs.org"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >
-                        GitHub sources.
-                    </a>
-                </header>
-                <div className="App-body">
-
-                    <BoardSelector boards={this.state.boards} setter={this.setBoard} />
-                </div>
+                <Board boardid={this.state.boardId} />
             </div>
         );
     }
-}
-
-
-function getBoard(id,comp) {
-    var board = null;
-    var myHeaders = new Headers();
-    myHeaders.append("Accept", "application/json");
-    var myInit = { method: 'GET',
-        headers: myHeaders,
-        mode: 'cors',
-        cache: 'default' };
-
-    var myRequest = new Request('kaban/boards/'+id,myInit);
-
-    fetch(myRequest,myInit)
-        .then(res => res.json())
-        .then((data) => {
-            comp.setState({board:data})
-        })
-        .catch(console.log)
-}
-
-function getCategory(id,comp) {
-    var myHeaders = new Headers();
-    myHeaders.append("Accept", "application/json");
-    var myInit = { method: 'GET',
-        headers: myHeaders,
-        mode: 'cors',
-        cache: 'default' };
-
-    var myRequest = new Request('kaban/category/'+id,myInit);
-
-    fetch(myRequest,myInit)
-        .then(res => res.json())
-        .then((data) => {
-            comp.setState({category:data})
-        })
-        .catch(console.log)
-
-}
-
-function getPost(id,comp) {
-    var myHeaders = new Headers();
-    myHeaders.append("Accept", "application/json");
-    var myInit = { method: 'GET',
-        headers: myHeaders,
-        mode: 'cors',
-        cache: 'default' };
-
-    var myRequest = new Request('kaban/posts/'+id,myInit);
-
-    fetch(myRequest,myInit)
-        .then(res => res.json())
-        .then((data) => {
-            comp.setState({post:data})
-        })
-        .catch(console.log)
-}
-
-
-
-class BoardSelector extends React.Component {
-    state = {
-        number:0
-    };
-
-
-    render() {
-        if (this.state.number != 0) {
-            return (
-                <div>
-                    <h3>Board</h3>
-                    {getBoard(this.state.number)}
-                </div>
-            );
-        }
+    renderLoaded() {
         return (
             <div>
-                <h3>Choose a board to visualise</h3>
-                <ul>
-                    {
-                        this.props.boards.map((board) =>
-                            <li><a href={"#"} onClick={() => {
-                                this.props.setter(board)
-                            }}><span>{board.id} - {board.title}</span></a></li>
-                        )
+                <h3>Choose a Board</h3>
+                <div className={"Board-selection-container"}>
+                    {this.state.boards.map(board =>
+                        <div key={board.id} className={"Board-selection"} onClick={() => {this.setState({boardId: board.id, chosen: true});}}>
+                            <h4>{board.title}</h4>
+                            <div>{board.id}</div>
+                        </div>
+                    )
                     }
-                </ul>
+                </div>
             </div>
         );
 
     }
+    renderLoading() {
+        return (
+            <div>
+                <h3>Choose a Board</h3>
+                {
+                    <h3>Loading...</h3>
+                }
+            </div>
+        );
+    }
+    render() {
+        if (this.state.chosen) {
+            return this.renderChosen()
+        }
+        if (this.state.loaded) {
+            return this.renderLoaded()
+        }
+        return this.renderLoading()
+    }
 }
+
+
 
 
 
@@ -224,11 +112,12 @@ class Board extends React.Component {
 
     state = {
         board:null,
-        boardid:null
+        boardid:null,
+        loaded:false
     }
 
     render() {
-        if (this.state.board === null) {
+        if (!this.state.loaded) {
             return (
                 <div className={"App-board"}>
                     <h2 className={"App-board-header"}>Loading...</h2>
@@ -243,7 +132,9 @@ class Board extends React.Component {
                         {this.state.board.categories.map(category =>
                             <Category categoryid={category}/>
                         )}
-                        <AddCategoryButton/>
+                        <div className={"App-category"} onClick={() => addNewCategory(this)}>
+                            Add new Category
+                        </div>
                     </div>
 
                 </div>
@@ -259,7 +150,6 @@ class Category extends React.Component {
         super(props);
         this.state.categoryid = props.categoryid;
 
-        this.addNewPost = this.addNewPost.bind(this)
 
 
     }
@@ -267,36 +157,6 @@ class Category extends React.Component {
     state = {
         category:null,
         categoryid:null
-    }
-
-    addNewPost(categoryid) {
-
-        var myHeaders = new Headers();
-
-        myHeaders.append("Accept", "application/json");
-        myHeaders.append("Content-type", "application/json");
-        var myInit = {
-            method: 'POST',
-            headers: myHeaders,
-            mode: 'cors',
-            cache: 'default',
-            body : "{\n" +
-                "    \"id\": 0,\n" +
-                "    \"title\": \"new title\",\n" +
-                "    \"content\": \"some content\",\n" +
-                "    \"category\": null,\n" +
-                "    \"tags\": null\n" +
-                "}"
-        };
-
-        var myRequest = new Request('kaban/posts/'+categoryid,myInit);
-
-        fetch(myRequest,myInit)
-            .then(getCategory(categoryid,this))
-            .catch(console.log)
-        console.log("Added");
-
-
     }
 
     componentDidMount() {
@@ -316,12 +176,12 @@ class Category extends React.Component {
             <div className={"App-category"}>
                 <h3 className={"App-category-header"}>{this.state.category.name}</h3>
                 <div className={"App-post-container"}>
-                    {
+                    {/*
                        this.state.category.posts.map(post =>
                             <Post postid={post} />
                         )
-                    }
-                    <div className={"App-post-button"} onClick={() => this.addNewPost(this.state.categoryid)}>
+                    */}
+                    <div className={"App-post-button"} onClick={() => addNewPost(this)}>
                         Add new Post
                     </div>
                 </div>
@@ -362,16 +222,8 @@ class Post extends React.Component {
 
 
 
-class AddCategoryButton extends React.Component {
-    render() {
-        return (
-            <div>
-
-            </div>
-        );
-    }
-}
 
 
 
 export default App;
+
