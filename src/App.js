@@ -2,7 +2,7 @@ import logo from './logo.svg';
 import './App.css';
 import React from "react";
 import ReactDOM from "react-dom";
-import {addNewCategory, addNewPost, getBoard, getBoards, getCategory, getPost} from "./Utils";
+import {addNewCategory, addNewPost, getBoard, getBoards, getCategory, getPost, removePost} from "./Utils";
 
 
 function App() {
@@ -130,7 +130,7 @@ class Board extends React.Component {
                 <div className={"Board-canvas"} >
                     <div className={"App-category-container"}>
                         {this.state.board.categories.map(category =>
-                            <Category categoryid={category}/>
+                            <Category key={category} categoryid={category}/>
                         )}
                         <div className={"App-category"} onClick={() => addNewCategory(this)}>
                             Add new Category
@@ -155,6 +155,7 @@ class Category extends React.Component {
     }
 
     state = {
+        loaded:false,
         category:null,
         categoryid:null
     }
@@ -163,24 +164,28 @@ class Category extends React.Component {
         getCategory(this.state.categoryid,this)
     }
 
-    render() {
-        console.log(this.state.category);
-        if (this.state.category === null) {
-            return (
-                <div className={"App-category"}>
-                    <h3 className={"App-category-header"}>Loading...</h3>
-                </div>
-            );
-        }
+    renderLoading() {
+        return (
+            <div className={"App-category"}>
+                <h3 className={"App-category-header"}>Loading...</h3>
+            </div>
+        );
+    }
+    renderLoaded() {
         return (
             <div className={"App-category"}>
                 <h3 className={"App-category-header"}>{this.state.category.name}</h3>
                 <div className={"App-post-container"}>
-                    {/*
-                       this.state.category.posts.map(post =>
-                            <Post postid={post} />
+                    {
+                        this.state.category.posts.map(post =>
+                            <div>
+                                <Post parent ={this} key={post} postid={post}>
+
+                                </Post>
+
+                            </div>
                         )
-                    */}
+                    }
                     <div className={"App-post-button"} onClick={() => addNewPost(this)}>
                         Add new Post
                     </div>
@@ -188,35 +193,51 @@ class Category extends React.Component {
             </div>
         );
     }
+    render() {
+        if (this.state.loaded) {
+           return this.renderLoaded();
+        }
+        return this.renderLoading()
+    }
 }
 
 class Post extends React.Component {
     constructor(props) {
         super(props);
-        this.state.postid = this.props.postid
+        this.state.postid = this.props.postid;
+        this.state.parent = this.props.parent
     }
     componentDidMount() {
         getPost(this.state.postid,this)
     }
 
     state = {
+        parent:null,
+        loaded:false,
         post:null,
         postid:null
     }
-    render() {
-        if (this.state.post === null ){
-            return (
-                <div className={"App-post"}>
-                    <h4 className={"App-post-header"}>Loading...</h4>
-                </div>
-            );
-        }
+    renderLoading() {
+        return (<div className={"App-post"}>
+         <h4 className={"App-post-header"}>Loading...</h4>
+            </div>);
+    }
+    renderLoaded() {
         return (
             <div className={"App-post"}>
                 <h4 className={"App-post-header"}>{this.state.post.title}</h4>
                 <p>{this.state.post.content}</p>
+                <div className={"App-post-button"} onClick={() => removePost(this.state.postid,this.state.parent)}>remove post</div>
             </div>
         );
+    }
+
+    render() {
+        if (this.state.loaded ){
+            return (this.renderLoaded());
+        }
+        return (this.renderLoading())
+
     }
 }
 
