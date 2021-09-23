@@ -143,3 +143,9 @@ export function removePost(id,parentCategory) {
         .catch(console.log)
 
 }
+
+export function changePostName(id,name,parentCategory){
+    console.log(parentCategory);
+    getCategory(parentCategory.state.categoryid,parentCategory);
+
+}

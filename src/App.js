@@ -1,8 +1,19 @@
 import logo from './logo.svg';
+import plus from './plus.svg';
 import './App.css';
 import React from "react";
 import ReactDOM from "react-dom";
-import {addNewCategory, addNewPost, getBoard, getBoards, getCategory, getPost, removePost} from "./Utils";
+import {
+    addNewCategory,
+    addNewPost,
+    changePostName,
+    getBoard,
+    getBoards,
+    getCategory,
+    getPost,
+    removePost
+} from "./Utils";
+import {getNodeText} from "@testing-library/react";
 
 
 function App() {
@@ -69,6 +80,9 @@ class Home extends React.Component {
                         </div>
                     )
                     }
+                    <div className={"Board-selection Board-selection-add"}>
+                        <img src={plus} className="Add-logo" alt="logo" />
+                    </div>
                 </div>
             </div>
         );
@@ -175,6 +189,7 @@ class Category extends React.Component {
         return (
             <div className={"App-category"}>
                 <h3 className={"App-category-header"}>{this.state.category.name}</h3>
+
                 <div className={"App-post-container"}>
                     {
                         this.state.category.posts.map(post =>
@@ -225,7 +240,8 @@ class Post extends React.Component {
     renderLoaded() {
         return (
             <div className={"App-post"}>
-                <h4 className={"App-post-header"}>{this.state.post.title}</h4>
+                {/*<h4 className={"App-post-header"}>{this.state.post.title}</h4>*/}
+                <EditableHeader category={this.state.parent} postid={this.state.postid} content={this.state.post.title} />
                 <p>{this.state.post.content}</p>
                 <div className={"App-post-button"} onClick={() => removePost(this.state.postid,this.state.parent)}>remove post</div>
             </div>
@@ -240,6 +256,70 @@ class Post extends React.Component {
 
     }
 }
+
+class EditableHeader extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state.content = this.props.content
+        this.toggleHidden = this.toggleHidden.bind(this)
+    }
+
+
+    state = {
+        editable:false,
+        content:""
+
+    }
+
+    toggleHidden(){
+
+        this.setState({editable:!this.state.editable})
+
+    }
+
+    renderEditable(){
+        return (
+            <div onDoubleClick={() => this.toggleHidden()}>
+               <EditField category={this.props.category} postid={this.props.postid} func={this.toggleHidden}/>
+            </div>
+
+        );
+    }
+
+    renderHeader(){
+        return (
+            <div onDoubleClick={() => this.toggleHidden()}>
+                <h3 className={"App-post-header"}>{this.state.content}</h3>
+            </div>
+
+        );
+    }
+
+    render() {
+        if (this.state.editable) {
+            return this.renderEditable()
+        }
+        return this.renderHeader()
+    }
+}
+
+class EditField extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state.func = this.props.func
+    }
+    state = {
+        func:null,
+
+    }
+    render() {
+
+        return (
+            <input autoFocus={true} onBlur={() => {this.state.func();changePostName(this.props.postid,"hello",this.props.category)}}/>
+        );
+    }
+}
+
 
 
 

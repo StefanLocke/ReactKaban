@@ -1,12 +1,20 @@
 .App {
   text-align: center;
+  min-width: 100vw;
+  min-height: 100vh;
+  background-color: #383f4c;
 }
 
 .App-logo {
   height: 10vmin;
   pointer-events: none;
 }
-
+.Add-logo {
+  filter: invert(24%) sepia(36%) saturate(2068%) hue-rotate(168deg) brightness(105%) contrast(85%);
+  margin-top: 15%;
+  height: 70%;
+  width: 70%;
+}
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
     animation: App-logo-spin infinite 20s linear;
@@ -14,7 +22,6 @@
 }
 
 .App-header {
-  background-color: #282c34;
   min-height: 10vh;
   display: flex;
   flex-direction: Row;
@@ -22,16 +29,13 @@
   justify-content: center;
   font-size: calc(10px + 2vmin);
   color: #000000;
-
 }
 
 .App-body {
-  background-color: #383f4c;
-  min-height: 90vh;
   display: flex;
   flex-direction: Row;
-  align-items: center;
   justify-content: center;
+  align-items: flex-start;
   font-size: calc(10px + 2vmin);
   color: white;
 
@@ -42,13 +46,24 @@
 }
 
 .Board-selection-container {
+  display: flex;
+  justify-content: center;
+  gap : 10px
 
 }
 .Board-selection {
+  width: 15vw;
   background-color: #61dafb;
   border-radius: 10px;
-  color : black;
+  color : #383f4c;
+  overflow-wrap: anywhere;
+
 }
+
+.Board-selection > h4 {
+    font-size: 100%;
+}
+
 .Board-selection:hover {
   filter: brightness(90%);
 }
@@ -59,32 +74,31 @@
 .App-board {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
   border-width: 2px;
   border-style: solid;
   border-radius: 10px;
-
-  min-width: 80vw;
-  max-width: 80vw;
-  min-height:80vh;
+  width: 99vw;
 }
 
 .App-board-header {
   margin: 0;
+  text-align: left;
 }
 
 .Board-canvas {
-  position: relative;
-  display: block;
+  display: flex;
   white-space: nowrap;
-  flex-grow: 1;
   overflow-x: auto;
   overflow-y: auto;
+  max-height: 80vh;
 }
 
 
 .App-category-container {
   /*display: block;*/
-  white-space: nowrap;
+  /*white-space: nowrap;*/
 }
 
 .App-category {
@@ -92,15 +106,17 @@
   vertical-align: top;
 
   margin: 10px;
-  background-color: navajowhite;
+  background-color: #383f4c;
   border-radius: 10px;
   width: 200px;
-  color: #282c34;
+  color: #000000;
+  background-color: #475161;
 
 }
 
 .App-category-header {
   margin: 0;
+  text-align: center;
 }
 
 .App-post-container {
@@ -109,14 +125,16 @@
 
 
 .App-post {
+  text-align: center;
   vertical-align: top;
-  background-color: antiquewhite;
+  background-color: #475161;
   border-radius: 10px;
   margin-left: 10px;
   margin-right: 10px;
   margin-bottom: 10px;
 }
 .App-post-button {
+  text-align: center;
   vertical-align: top;
   background-color: antiquewhite;
   border-radius: 10px;
@@ -135,6 +153,7 @@
 }
 
 .App-category-button {
+
   display: inline-block;
   vertical-align: top;
   background-color: antiquewhite;
